@@ -11,18 +11,10 @@ const rl = readline.createInterface({
 let website = userInput[0];
 let filePath = userInput[1];
 
-
-const fileWriter = (body) => {
-  fs.writeFile(filePath, body, err => {
-    if (err && err.errno === -2) {
-      console.log('Supplied path is invalid. Exiting file');
-      process.exit();
-      return;
-    }
-  });
-
+// Calculates the size of a given file by counting the number of characters (bytes) within it
+const fileSizeCalc = (path) => {
   let counter = 0;
-  fs.readFile(filePath, 'utf8', (err, data) => {
+  fs.readFile(path, 'utf8', (err, data) => {
     if (err) {
       console.error(err);
       return;
@@ -35,23 +27,38 @@ const fileWriter = (body) => {
 
     process.exit();
   });
+}
+
+//Writes a file if provided with a valid path
+const fileWriter = (body) => {
+  fs.writeFile(filePath, body, err => {
+    if (err) {
+      console.log('Supplied path is invalid. Exiting file');
+      process.exit();
+      return;
+    }
+  });
+
+  fileSizeCalc(filePath);
+
 };
+
 
 request(website, (error, response, body) => {
   
-  if (error) {
-    console.log('error', error);
+  if (error && response === undefined) {
+    console.log("ERROR: The provided URL does not exist")
+    process.exit()
   }
-  if (response.statusCode !== 200) {
-    console.log('requestStatus', response && response.statusCode);
-  }
+  
+  fs.access(filePath, (err) => {
 
-  
-  
-  fs.access('./index.html', fs.constants.R_OK, (err) => {
     if (err) {
-      fileWriter(body);
-    } else {
+      if (err.syscall === 'access') { //If the file does not exist, create it
+        fileWriter(body);
+      }
+      
+    } else { //If it does exist, ask whether to overwrite it
       rl.question(`${filePath} already exists. Overwrite? (Y/N)`, (response) => {
         if (response === 'Y' || response === 'y') {
           fileWriter(body);
