@@ -27,13 +27,13 @@ const fileSizeCalc = (path) => {
 
     process.exit();
   });
-}
+};
 
 //Writes a file if provided with a valid path
 const fileWriter = (body) => {
   fs.writeFile(filePath, body, err => {
     if (err) {
-      console.log('Supplied path is invalid. Exiting file');
+      console.log('Supplied path is invalid. Exiting program.');
       process.exit();
       return;
     }
@@ -47,8 +47,8 @@ const fileWriter = (body) => {
 request(website, (error, response, body) => {
   
   if (error && response === undefined) {
-    console.log("ERROR: The provided URL does not exist")
-    process.exit()
+    console.log("The provided URL does not exist. Exiting program.");
+    process.exit();
   }
   
   fs.access(filePath, (err) => {
